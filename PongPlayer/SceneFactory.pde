@@ -1,15 +1,4 @@
 class SceneFactory {
-
-  color CreateSceneTest() {
-    PImage textureImage = loadImage("bricks.png");
-    
-    bricks.add(brickFactory.CreateTriangle(600, 50, 680, 75, 625, 175, brickId++, textureImage));
-    bricks.add(brickFactory.CreateRectangle(1000, 200, 300, 150, brickId++, textureImage));
-    bricks.add(brickFactory.CreateQuad(800, 250, 900, 250, 1000, 400, 700, 400, brickId++, textureImage));
-    bricks.add(brickFactory.CreateCircle(400, 400, 75, brickId++, textureImage));
-    
-    return color(0);
-  }
   
   color CreateScene1() {
     bricks.add(brickFactory.CreateQuad(460, 550, 745, 550, 770, 600, 485, 600, 0, color(128, 128, 128, 240)));
@@ -119,7 +108,7 @@ class SceneFactory {
         int ry1 = (int) random(120, 130);
         int ry2 = (int) random(120, 140);
         //if(i % 2 == 0) {
-          bricks.add(brickFactory.CreateQuad(20+(i*rx), 100 +(j*ry1), 40+(i*rx), 20 +(j*ry1), 80+(i*rx), 20 +(j*ry1), 100+(i*rx), 100 +(j*ry2), brickId, colors[int(random(colors.length))]));
+          //bricks.add(brickFactory.CreateQuad(20+(i*rx), 100 +(j*ry1), 40+(i*rx), 20 +(j*ry1), 80+(i*rx), 20 +(j*ry1), 100+(i*rx), 100 +(j*ry2), brickId, colors[int(random(colors.length))]));
         //}
         //else {
           //bricks.add(brickFactory.CreateQuad(20+(i*rx), 100 +(j*ry1), 40+(i*rx), 20 +(j*ry1), 80+(i*rx), 20 +(j*ry1), 100+(i*rx), 100 +(j*ry2), brickId, color(172, 220, 221)));
@@ -131,7 +120,7 @@ class SceneFactory {
   }
   
   color CreateScene100() {
-    bricks.add(brickFactory.CreateQuad(400, 400, 500, 300, 600, 400, 500, 500, brickId, color(0)));
+    //bricks.add(brickFactory.CreateQuad(400, 400, 500, 300, 600, 400, 500, 500, brickId, color(0)));
     
     return color(70);
   }

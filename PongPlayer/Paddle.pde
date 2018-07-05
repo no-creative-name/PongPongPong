@@ -19,7 +19,7 @@ class Paddle {
     else {
       mouseCurrentX = mouseX;
     }
-    if(ball.position.x > mouseCurrentX - paddleWidth / 2 && ball.position.x < mouseCurrentX + paddleWidth / 2 && ball.position.y > paddleY - paddleHeight / 2 - ball.diameter / 2  && ball.position.y < height) { //<>// //<>//
+    if(ball.position.x > mouseCurrentX - paddleWidth / 2 && ball.position.x < mouseCurrentX + paddleWidth / 2 && ball.position.y > paddleY - paddleHeight / 2 - ball.diameter / 2  && ball.position.y < height) { //<>// //<>// //<>// //<>// //<>//
       isColliding = true;
     }
     else {

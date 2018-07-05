@@ -4,7 +4,7 @@ import java.net.*;
 import java.util.*;
 
 OscP5 oscP5;
-NetAddress myRemoteLocation;
+NetAddress server;
 
 SceneFactory sceneFactory = new SceneFactory();
 BrickFactory brickFactory = new BrickFactory();
@@ -14,17 +14,14 @@ ArrayList<Brick> bricks = new ArrayList<Brick>();
 ArrayList<Brick> destroyedBricks = new ArrayList<Brick>();
 
 ArrayList<Ball> balls = new ArrayList<Ball>();
-
 ArrayList<Paddle> paddles = new ArrayList<Paddle>();
 
-int paddleHeight, paddleX, paddleY, ballDiameter, totalNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
-float paddleWidth, speedX, speedY, x, y, influenceX, brickRegenerationSpeed;
+int paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
+float paddleWidth, initialBallSpeedX, initialBallSpeedY, initialBallX, initialBallY, ballInfluenceX;
 boolean isGameOver, hasWon, isBoosting, isDeboosting, isRegistered, isToRestart, isPaddleInverted, isBlackscreen;
 String hostAddress;
 
-int messageNumber;
 int count = 0;
-int brickId = 0;
 
 color backgroundColor;
 
@@ -36,70 +33,39 @@ void setup() {
   
   //pixelDensity(displayDensity());
   
-  brickRegenerationSpeed = 1;
   paddleWidth = 2000;
   paddleHeight = 10;
   paddleX = width / 2;
   paddleY = height - 20;
-  totalNumberOfBalls = 1;
+  initialNumberOfBalls = 1;
   ballDiameter = 30;
-  x = 50;
-  y = 50;
-  speedX = 1;
-  speedY = 5;
-  influenceX = 0.2;
+  initialBallX = 50;
+  initialBallY = 50;
+  initialBallSpeedX = 1;
+  initialBallSpeedY = 5;
+  ballInfluenceX = 0.2;
   isGameOver = false;
   hasWon = false;
   
   soundId = 0;
   
-  /*try { 
-    InetAddress addr = InetAddress.getLocalHost(); 
-    
-    byte[] ipAddr = addr.getAddress();
-    
-    String raw_addr = addr.toString(); 
-    String[] list = split(raw_addr,'/'); 
-    hostAddress = list[1];
-  }
-  catch (UnknownHostException e) { 
-  }*/
-  try {
-    Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-    for (NetworkInterface netint : Collections.list(nets)) {
-      if (netint.getName().equals("wlan0")) {
-        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-        ArrayList<InetAddress> iA = Collections.list(inetAddresses);
-        if (Character.getNumericValue(iA.get(0).toString().substring(1).charAt(0)) == 1) {
-          hostAddress = iA.get(0).toString().substring(1);
-        }
-        else {
-          hostAddress = iA.get(1).toString().substring(1);
-        }
-      }
-    } //<>//
-  }
-  catch (SocketException e) {
-    
-  }
+  initializeHostAddress(); //<>//
   
   playerPort = 15000;
   oscP5 = new OscP5(this, playerPort);
-  myRemoteLocation = new NetAddress("192.168.0.100", 12000);
+  server = new NetAddress("192.168.0.100", 12000);
   
   bricks.clear();
   balls.clear();
   paddles.clear();
     
   initializeBrickLibrary();
-    
-  //  Initialize bricks
-  //backgroundColor = sceneFactory.CreateSceneTest(); //<>//
+     //<>//
   backgroundColor = sceneFactory.CreateScene1();
   
   //  Initialize balls
-  for (int i = 0; i < totalNumberOfBalls; i++) {
-    balls.add(new Ball(new PVector(x+(i*ballDiameter*2), y), new PVector(speedX*(random(2)+1), speedY*(random(2)+1)), ballDiameter, influenceX, i));
+  for (int i = 0; i < initialNumberOfBalls; i++) {
+    balls.add(new Ball(new PVector(initialBallX+(i*ballDiameter*2), initialBallY), new PVector(initialBallSpeedX*(random(2)+1), initialBallSpeedY*(random(2)+1)), ballDiameter, ballInfluenceX, i));
   }
   
   //  Initialize paddles
@@ -110,11 +76,11 @@ void setup() {
 
 void draw() {
   
-  //RESET BLACKSCREEN AFTER 2 SECONDS
+  //  Reset blackscreen after 2 seconds
   if(millis() - blackscreenStartTime > 2000) {
     isBlackscreen = false;
   }
-  //SLOWLY RESET PADDLE WIDTH TO INITAL WIDTH
+  //  Slowly reset paddle to initial width
   for(int j = 0; j < paddles.size(); j++) {
       Paddle paddle = paddles.get(j);
       if(paddle.paddleWidth < this.paddleWidth) {
@@ -153,42 +119,8 @@ void draw() {
     }
   }*/
   else {
-    IntList toRemove = new IntList();
-    
-    for(int i = 0; i < bricks.size(); i++) {
-      Brick brick =  bricks.get(i);
-      boolean brickHasAlreadyCollided = false;
-      for(int j = 0; j < balls.size(); j++) {
-        brick.run(balls.get(j));
-        if (brick.isColliding && !brickHasAlreadyCollided) {
-          soundId = 3;
-          oscMessage(soundId, i);
-          
-          //SEND BRICK DATA
-          OscMessage message = new OscMessage("/brickSend");
-          
-          message.add(hostAddress);
-          message.add(playerPort);
-          
-          message.add(brick.id);
-          oscP5.send(message, myRemoteLocation);
-          
-          destroyedBricks.add(bricks.get(i));
-          toRemove.append(i);
-          brickHasAlreadyCollided = true;
-        }
-      }
-    }
-    
-    for (int i = toRemove.size() - 1; i >= 0; i--) {
-      bricks.remove(toRemove.get(i));
-    }
-          
-    /*if (count % (10 / brickRegenerationSpeed) == 0) {
-      bricks.add(destroyedBricks.get(1));
-      destroyedBricks.remove(1);
-    }*/
-    fill(255);
+    collideBallWithBricks();
+    collidePaddleWithBall();
     
     if(balls.size() == 0) {
       isGameOver=true;
@@ -198,35 +130,10 @@ void draw() {
       hasWon = true;
     }
     
-    totalHits = 0;
-    for(int i = 0; i < balls.size(); i++) {
-      Ball ball = balls.get(i);
-      if(!ball.isDead) {
-        for(int j = 0; j < paddles.size(); j++) {
-          Paddle paddle = paddles.get(j);
-          paddle.run(ball, isBoosting, isDeboosting, isPaddleInverted);
-          ball.run(paddle.isColliding, balls, isPaddleInverted);
-          if(paddle.isColliding) {
-            soundId = ball.soundId;
-            oscMessage(soundId, i);
-          }
-        };
-        totalHits+=ball.hits;
-       if(isBoosting) {
-          ball.boost();
-        }
-        if(isDeboosting) {
-          ball.deboost();
-        } 
-      }
-      else {
-        balls.remove(i);
-      }
-    }
-    
     fill(255);
     textSize(25);
     text("HITS: "+totalHits, 10, 50);
+    
     if (isBlackscreen) {
       fill(0);
       rect(0,0,width,height);
@@ -234,14 +141,6 @@ void draw() {
   }
   
   count++;
-}
-
-void oscMessage(int soundId, int eventId) {
-  OscMessage myMessage = new OscMessage("/pong");
-  myMessage.add(soundId);
-  myMessage.add(eventId%4+1);
-  myMessage.add(bricks.size()%10+1);
-  oscP5.send(myMessage, myRemoteLocation);
 }
 
 void oscEvent(OscMessage oscMessage) {
@@ -259,7 +158,7 @@ void oscEvent(OscMessage oscMessage) {
   }
   else if(oscMessage.checkAddrPattern("/godAddBall")) {
     if(balls.size() < 3) {
-      balls.add(new Ball(new PVector(x+(3*ballDiameter*2), y), new PVector(speedX*(random(2)+1), speedY*(random(2)+1)), ballDiameter, influenceX, 3));
+      balls.add(new Ball(new PVector(initialBallX+(3*ballDiameter*2), initialBallY), new PVector(initialBallSpeedX*(random(2)+1), initialBallSpeedY*(random(2)+1)), ballDiameter, ballInfluenceX, 3));
     }
   }
   else if(oscMessage.checkAddrPattern("/godSpeedUpBall")) {
@@ -300,7 +199,7 @@ void registerPlayer() {
   print(hostAddress);
   myMessage.add(hostAddress);
   myMessage.add(playerPort);
-  oscP5.send(myMessage, myRemoteLocation);
+  oscP5.send(myMessage, server);
   isRegistered = true;
 }
 
@@ -308,7 +207,7 @@ void unregisterPlayer() {
   print("unregistering");
   OscMessage myMessage = new OscMessage("/playerLogout");
   myMessage.add(hostAddress);
-  oscP5.send(myMessage, myRemoteLocation);
+  oscP5.send(myMessage, server);
   isRegistered = false;
 }
 
@@ -344,6 +243,80 @@ void mouseReleased() {
   }
   if(mouseButton == RIGHT) {
     isDeboosting = false;
+  }
+}
+
+void initializeHostAddress() {
+  try {
+    Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+    for (NetworkInterface netint : Collections.list(nets)) {
+      if (netint.getName().equals("wlan0")) {
+        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+        ArrayList<InetAddress> iA = Collections.list(inetAddresses);
+        if (Character.getNumericValue(iA.get(0).toString().substring(1).charAt(0)) == 1) {
+          hostAddress = iA.get(0).toString().substring(1);
+        }
+        else {
+          hostAddress = iA.get(1).toString().substring(1);
+        }
+      }
+    }
+  }
+  catch (SocketException e) {
+    
+  }
+}
+
+void collideBallWithBricks() {
+  IntList toRemove = new IntList();
+  for(int i = 0; i < bricks.size(); i++) {
+      Brick brick =  bricks.get(i);
+      boolean brickHasAlreadyCollided = false;
+      for(int j = 0; j < balls.size(); j++) {
+        brick.run(balls.get(j));
+        if (brick.isColliding && !brickHasAlreadyCollided) {
+          
+          //SEND BRICK DATA
+          OscMessage message = new OscMessage("/brickSend");
+          
+          message.add(hostAddress);
+          message.add(playerPort);
+          
+          message.add(brick.id);
+          oscP5.send(message, server);
+          
+          destroyedBricks.add(bricks.get(i));
+          toRemove.append(i);
+          brickHasAlreadyCollided = true;
+        }
+      }
+    }
+    for (int i = toRemove.size() - 1; i >= 0; i--) {
+      bricks.remove(toRemove.get(i));
+    }
+}
+
+void collidePaddleWithBall() {
+  totalHits = 0;
+  for(int i = 0; i < balls.size(); i++) {
+    Ball ball = balls.get(i);
+    if(!ball.isDead) {
+      for(int j = 0; j < paddles.size(); j++) {
+        Paddle paddle = paddles.get(j);
+        paddle.run(ball, isBoosting, isDeboosting, isPaddleInverted);
+        ball.run(paddle.isColliding, balls, isPaddleInverted);
+      };
+      totalHits+=ball.hits;
+     if(isBoosting) {
+        ball.boost();
+      }
+      if(isDeboosting) {
+        ball.deboost();
+      } 
+    }
+    else {
+      balls.remove(i);
+    }
   }
 }
 
