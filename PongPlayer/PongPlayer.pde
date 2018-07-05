@@ -296,7 +296,7 @@ void oscEvent(OscMessage oscMessage) {
 }
 
 void registerPlayer() {
-  OscMessage myMessage = new OscMessage("/playerSetup");
+  OscMessage myMessage = new OscMessage("/playerLogin");
   print(hostAddress);
   myMessage.add(hostAddress);
   myMessage.add(playerPort);

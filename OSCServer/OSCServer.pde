@@ -2,12 +2,9 @@ import oscP5.*;
 import netP5.*;
 
 OscP5 oscP5;
-NetAddress myRemoteLocation, godComputerLocation;
+NetAddress godComputerLocation;
 
-//ArrayList<Integer> playerPorts = new ArrayList<Integer>();
 ArrayList<Player> players = new ArrayList<Player>();
-
-int messageNumber;
 
 void setup() {
   size(300,300);
@@ -16,58 +13,17 @@ void setup() {
 }
 
 void oscEvent(OscMessage oscMessage) {
-  if(oscMessage.checkAddrPattern("/playerSetup")) {
-    OscMessage soundMessage = new OscMessage("/pong");
-    soundMessage.add(constrain(players.size(), 0, 4));
-    oscP5.send(soundMessage, new NetAddress("192.168.0.100", 12666));
-    String currentPlayerIpAddress = oscMessage.get(0).stringValue();
-    int currentPlayerPort = oscMessage.get(1).intValue();
-    boolean isPlayerAlreadyRegistered = false;
-    for(int i = 0; i < players.size(); i++) {
-      if(players.get(i).ipAddress == currentPlayerIpAddress) {
-        isPlayerAlreadyRegistered = true;
-      }
-    }
-    if(!isPlayerAlreadyRegistered) {
-      players.add(new Player(currentPlayerIpAddress, currentPlayerPort));
-      OscMessage myMessage = new OscMessage("/playerLogin");
-      myMessage.add(currentPlayerIpAddress);
-      oscP5.send(myMessage, godComputerLocation);
-      print("send");
-    }
+  if(oscMessage.checkAddrPattern("/playerLogin")) {
+    sendPlayerCountToCsound();
+    registerPlayer(oscMessage.get(0).stringValue(), 15000);
+  }
+  if(oscMessage.checkAddrPattern("/playerLogout")) {
+    sendPlayerCountToCsound();
+    unregisterPlayer(oscMessage.get(0).stringValue(), 15000);  
   }
   if(oscMessage.checkAddrPattern("/brickSend")) {
     if(players.size() > 0) {
-      String currentPlayerIpAddress = oscMessage.get(0).stringValue();
-      int currentPlayerPort = oscMessage.get(1).intValue();
-      String ipToSendTo = "";
-      int randomLocation = int(random(0, players.size()-1));
-      ArrayList<Player> freePlayers = new ArrayList<Player>();
-      for(int i = 0; i < players.size(); i++) {
-        if(!players.get(i).ipAddress.equals(currentPlayerIpAddress)) {
-          freePlayers.add(players.get(i));
-        }
-      }
-      if(freePlayers.size() > 0) {
-        ipToSendTo = freePlayers.get(randomLocation).ipAddress;
-        myRemoteLocation = new NetAddress(ipToSendTo, currentPlayerPort);
-        oscP5.send(oscMessage, myRemoteLocation);
-      }
-    }
-  }
-  if(oscMessage.checkAddrPattern("/playerLogout")) {
-    OscMessage soundMessage = new OscMessage("/pong");
-    soundMessage.add(constrain(players.size()-1, 0, 4));
-    oscP5.send(soundMessage, new NetAddress("localhost", 12666));
-    String currentPlayerIpAddress = oscMessage.get(0).stringValue();
-    for(int i = 0; i < players.size(); i++) {
-      if(players.get(i).ipAddress.equals(currentPlayerIpAddress)) {
-        players.remove(i);
-        print(players.size());
-        OscMessage myMessage = new OscMessage("/playerLogout");
-        myMessage.add(currentPlayerIpAddress);
-        oscP5.send(myMessage, godComputerLocation);
-      }
+      forwardBrickMessageToRandomPlayer(oscMessage, oscMessage.get(0).stringValue());
     }
   }
 }
@@ -78,6 +34,55 @@ void draw() {
     for(int i = 0; i < players.size(); i++) {
       text(players.get(i).ipAddress, width/2, 50+20*i);
     }
+}
+
+void registerPlayer(String ipAddress, int port) {
+    boolean isPlayerAlreadyRegistered = false;
+    for(int i = 0; i < players.size(); i++) {
+      if(players.get(i).ipAddress == ipAddress) {
+        isPlayerAlreadyRegistered = true;
+      }
+    }
+    if(!isPlayerAlreadyRegistered) {
+      players.add(new Player(ipAddress, port));
+      OscMessage myMessage = new OscMessage("/playerLogin");
+      myMessage.add(ipAddress);
+      oscP5.send(myMessage, godComputerLocation);
+    }
+}
+
+void unregisterPlayer(String ipAddress, int port) {
+    for(int i = 0; i < players.size(); i++) {
+      if(players.get(i).ipAddress.equals(ipAddress)) {
+        players.remove(i);
+        OscMessage myMessage = new OscMessage("/playerLogout");
+        myMessage.add(ipAddress);
+        oscP5.send(myMessage, godComputerLocation);
+      }
+    }
+}
+
+void forwardBrickMessageToRandomPlayer(OscMessage message, String originIpAddress) {
+      int currentPlayerPort = 15000;
+      String ipToSendTo = "";
+      int randomLocation = int(random(0, players.size()-1));
+      ArrayList<Player> freePlayers = new ArrayList<Player>();
+      for(int i = 0; i < players.size(); i++) {
+        if(!players.get(i).ipAddress.equals(originIpAddress)) {
+          freePlayers.add(players.get(i));
+        }
+      }
+      if(freePlayers.size() > 0) {
+        ipToSendTo = freePlayers.get(randomLocation).ipAddress;
+        NetAddress myRemoteLocation = new NetAddress(ipToSendTo, currentPlayerPort);
+        oscP5.send(message, myRemoteLocation);
+      }
+}
+
+void sendPlayerCountToCsound() {
+    OscMessage soundMessage = new OscMessage("/pong");
+    soundMessage.add(constrain(players.size(), 0, 4));
+    oscP5.send(soundMessage, new NetAddress("192.168.0.100", 12666));
 }
 
 class Player {
