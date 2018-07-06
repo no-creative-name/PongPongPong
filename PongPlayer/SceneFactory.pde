@@ -1,6 +1,6 @@
 class SceneFactory {
   
-  Scene1() {
+  color CreateScene1() {
     bricks.add(brickFactory.CreateQuad(460, 550, 745, 550, 770, 600, 485, 600, 0, color(128, 128, 128, 240)));
     bricks.add(brickFactory.CreateQuad(440, 250, 1200, 250, 1310, 430, 550, 430, 1, color(0, 0, 0, 240)));
     bricks.add(brickFactory.CreateQuad(545, 450, 595, 450, 695, 630, 645, 630, 2, color(255, 255, 153, 150)));
