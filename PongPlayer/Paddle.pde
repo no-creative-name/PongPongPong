@@ -13,13 +13,13 @@ class Paddle {
   }
   
   void run(Ball ball, boolean _isBoosting, boolean _isDeboosting, boolean _isPaddleInverted) {
-    if(_isPaddleInverted) {
+    if(_isPaddleInverted) {  
       mouseCurrentX = -mouseX + width;
     }
     else {
       mouseCurrentX = mouseX;
     }
-    if(ball.position.x > mouseCurrentX - paddleWidth / 2 && ball.position.x < mouseCurrentX + paddleWidth / 2 && ball.position.y > paddleY - paddleHeight / 2 - ball.diameter / 2  && ball.position.y < height) { //<>// //<>// //<>// //<>// //<>//
+    if(ball.position.x > mouseCurrentX - paddleWidth / 2 && ball.position.x < mouseCurrentX + paddleWidth / 2 && ball.position.y > paddleY - paddleHeight / 2 - ball.diameter / 2  && ball.position.y < height) { //<>// //<>//
       isColliding = true;
     }
     else {

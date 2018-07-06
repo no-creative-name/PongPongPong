@@ -16,7 +16,7 @@ ArrayList<Brick> destroyedBricks = new ArrayList<Brick>();
 ArrayList<Ball> balls = new ArrayList<Ball>();
 ArrayList<Paddle> paddles = new ArrayList<Paddle>();
 
-int paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
+int currentLevel, paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
 float paddleWidth, initialBallSpeedX, initialBallSpeedY, initialBallX, initialBallY, ballInfluenceX;
 boolean isGameOver, hasWon, isBoosting, isDeboosting, isRegistered, isToRestart, isPaddleInverted, isBlackscreen;
 String hostAddress;
@@ -33,7 +33,8 @@ void setup() {
   
   //pixelDensity(displayDensity());
   
-  paddleWidth = 2000;
+  currentLevel = 0;
+  paddleWidth = 200;
   paddleHeight = 10;
   paddleX = width / 2;
   paddleY = height - 20;
@@ -108,16 +109,15 @@ void draw() {
       isToRestart = true;
     }
   }
-  /*else if(hasWon) {
-    textSize(50);
-    text("YOU DID IT!", width/2-150, height/2);
-    if(isRegistered) {
-      unregisterPlayer();
+  else if(hasWon) {
+    int nextLevel = currentLevel + 1;
+    print(nextLevel);
+    if(nextLevel == 4) {
+      nextLevel = 0;
     }
-    if(frameCount % 200 == 0) {
-      isToRestart = true;
-    }
-  }*/
+    setupNextLevel(nextLevel);
+    currentLevel = nextLevel;
+  }
   else {
     collideBallWithBricks();
     collidePaddleWithBall();
@@ -369,4 +369,50 @@ void initializeBrickLibrary() {
   brickLibrary.add(brickFactory.CreateQuad(224, 202, 213, 130, 501, 91, 511, 165, 43, color(#101103)));
   brickLibrary.add(brickFactory.CreateQuad(314, 120, 305, 31, 397, 26, 406, 105, 44, color(#101103)));
   brickLibrary.add(brickFactory.CreateQuad(401, 79, 538, 59, 540, 89, 406, 107, 45, color(#CA3904)));
+}
+
+void setupNextLevel(int levelId) {
+  currentLevel = 0;
+  paddleWidth = 200;
+  paddleHeight = 10;
+  paddleX = width / 2;
+  paddleY = height - 20;
+  initialNumberOfBalls = 1;
+  ballDiameter = 30;
+  initialBallX = 50;
+  initialBallY = 50;
+  initialBallSpeedX = 1;
+  initialBallSpeedY = 5;
+  ballInfluenceX = 0.2;
+  isGameOver = false;
+  hasWon = false;
+  
+  bricks.clear();
+  balls.clear();
+  paddles.clear();
+  switch(levelId) {
+    case 0:
+      backgroundColor = sceneFactory.CreateScene1();
+      break;
+    case 1:
+      backgroundColor = sceneFactory.CreateScene2();
+      break;
+    case 2:
+      backgroundColor = sceneFactory.CreateScene3();
+      break;
+    case 3:
+      backgroundColor = sceneFactory.CreateScene4();
+      break;
+    case 4:
+      backgroundColor = sceneFactory.CreateScene5();
+      break;
+  }
+  
+  //  Initialize balls
+  for (int i = 0; i < initialNumberOfBalls; i++) {
+    balls.add(new Ball(new PVector(initialBallX+(i*ballDiameter*2), initialBallY), new PVector(initialBallSpeedX*(random(2)+1), initialBallSpeedY*(random(2)+1)), ballDiameter, ballInfluenceX, i));
+  }
+  
+  //  Initialize paddles
+  paddles.add(new Paddle(paddleWidth, paddleHeight, paddleX, paddleY, 0));
 }
