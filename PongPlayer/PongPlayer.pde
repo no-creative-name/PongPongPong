@@ -97,8 +97,13 @@ void draw() {
     
   if (isToRestart) {
     background(0);
-    fill(255);
     textSize(50);
+    if(count % 50 == 0) {
+      fill(0);
+    }
+    if(count % 100 == 0) {
+      fill(255);
+    }
     text("PRESS SPACE TO JOIN GAME  ", width/2-350, height/2);
   }
   else if (isGameOver) {
