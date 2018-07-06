@@ -20,6 +20,7 @@ ArrayList<Paddle> paddles = new ArrayList<Paddle>();
 int currentLevel, paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
 float paddleWidth, initialBallSpeedX, initialBallSpeedY, initialBallX, initialBallY, ballInfluenceX;
 boolean isGameOver, hasWon, isBoosting, isDeboosting, isRegistered, isToRestart, isPaddleInverted, isBlackscreen;
+boolean pongPongPong;
 String hostAddress;
 
 int count = 0;
@@ -28,6 +29,7 @@ color backgroundColor;
 
 void setup() {
   
+  pongPongPong = true;
   //size(900, 800, P2D);
   fullScreen(P2D);
   noCursor();
@@ -123,6 +125,15 @@ void draw() {
     currentLevel = nextLevel;
   }
   else {
+    if(count % 100 == 0 && count != 0) {
+      pongPongPong = false;
+    }
+    if(pongPongPong) {
+      print("Ponpon");
+      fill(255);
+      textSize(100);
+      text("PONG PONG PONG!", width/2-width/4, height/2);
+    }
     collideBallWithBricks();
     collidePaddleWithBall();
     
@@ -262,6 +273,7 @@ void collideBallWithBricks() {
       for(int j = 0; j < balls.size(); j++) {
         brick.run(balls.get(j));
         if (brick.isColliding && !brickHasAlreadyCollided) {
+          totalHits++;
           
           //SEND BRICK DATA
           OscMessage message = new OscMessage("/brickSend");
@@ -286,7 +298,6 @@ void collideBallWithBricks() {
 }
 
 void collidePaddleWithBall() {
-  totalHits = 0;
   for(int i = 0; i < balls.size(); i++) {
     Ball ball = balls.get(i);
     if(!ball.isDead) {
@@ -298,7 +309,6 @@ void collidePaddleWithBall() {
           //toCsound.sendPaddleCollision();
         }
       };
-      totalHits+=ball.hits;
      if(isBoosting) {
         ball.boost();
       }
@@ -364,7 +374,6 @@ void initializeBrickLibrary() {
 }
 
 void setupNextLevel(int levelId) {
-  currentLevel = 0;
   paddleWidth = 200;
   paddleHeight = 10;
   paddleX = width / 2;
@@ -380,7 +389,7 @@ void setupNextLevel(int levelId) {
   hasWon = false;
   
   bricks.clear();
-  balls.clear();
+  //balls.clear();
   paddles.clear();
   switch(levelId) {
     case 0:
@@ -401,12 +410,15 @@ void setupNextLevel(int levelId) {
   }
   
   //  Initialize balls
-  for (int i = 0; i < initialNumberOfBalls; i++) {
+  /*for (int i = 0; i < initialNumberOfBalls; i++) {
     balls.add(new Ball(new PVector(initialBallX+(i*ballDiameter*2), initialBallY), new PVector(initialBallSpeedX*(random(2)+1), initialBallSpeedY*(random(2)+1)), ballDiameter, ballInfluenceX, i));
-  }
+  }*/
   
   //  Initialize paddles
   paddles.add(new Paddle(paddleWidth, paddleHeight, paddleX, paddleY, 0));
+  
+  count = 0;
+  pongPongPong = true;
 }
 
 void registerPlayer() {
