@@ -1,6 +1,6 @@
 class SceneFactory {
   
-  color CreateScene1() {
+  Scene1() {
     bricks.add(brickFactory.CreateQuad(460, 550, 745, 550, 770, 600, 485, 600, 0, color(128, 128, 128, 240)));
     bricks.add(brickFactory.CreateQuad(440, 250, 1200, 250, 1310, 430, 550, 430, 1, color(0, 0, 0, 240)));
     bricks.add(brickFactory.CreateQuad(545, 450, 595, 450, 695, 630, 645, 630, 2, color(255, 255, 153, 150)));
@@ -74,7 +74,7 @@ class SceneFactory {
   }
   
   color CreateScene5() {
-    PImage textureImage = loadImage("tex_01.png");
+    PImage textureImage = loadImage("bricks.png");
     
     bricks.add(brickFactory.CreateCircle(400, 600, 100, 46, color(255, 214, 51)));
     
