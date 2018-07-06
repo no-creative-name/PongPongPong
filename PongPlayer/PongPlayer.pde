@@ -25,6 +25,7 @@ String hostAddress;
 
 int count = 0;
 
+PFont font;
 color backgroundColor;
 
 void setup() {
@@ -67,6 +68,7 @@ void setup() {
   initializeBrickLibrary();
      //<>//
   backgroundColor = sceneFactory.CreateScene1();
+  font = loadFont("KarmaticArcade-48.vlw");
   
   //  Initialize balls
   for (int i = 0; i < initialNumberOfBalls; i++) {
@@ -80,6 +82,8 @@ void setup() {
 }
 
 void draw() {
+  
+  textFont(font);
   
   //  Reset blackscreen after 2 seconds
   if(millis() - blackscreenStartTime > 2000) {
@@ -104,13 +108,13 @@ void draw() {
     if(count % 100 == 0) {
       fill(255);
     }
-    text("PRESS SPACE TO JOIN GAME  ", width/2-350, height/2);
+    text("PRESS SPACE TO JOIN GAME  ", width/2-500, height/2);
   }
   else if (isGameOver) {
     toCsound.sendGameOver();
     fill(255);
     textSize(50);
-    text("GAME OVER", width/2-150, height/2);
+    text("GAME OVER", width/2-220, height/2);
     if(isRegistered) {
       isPaddleInverted = false;
       unregisterPlayer();
@@ -136,7 +140,7 @@ void draw() {
     if(pongPongPong) {
       fill(255);
       textSize(100);
-      text("PONG PONG PONG!", width/2-width/4, height/2);
+      text("PONG PONG PONG!", width/2-width/3.5, height/2);
     }
     collideBallWithBricks();
     collidePaddleWithBall();
