@@ -5,6 +5,7 @@ import java.util.*;
 
 OscP5 oscP5;
 NetAddress server;
+OscToCsoundUtility toCsound;
 
 SceneFactory sceneFactory = new SceneFactory();
 BrickFactory brickFactory = new BrickFactory();
@@ -55,6 +56,7 @@ void setup() {
   playerPort = 15000;
   oscP5 = new OscP5(this, playerPort);
   server = new NetAddress("192.168.0.100", 12000);
+  toCsound = new OscToCsoundUtility();
   
   bricks.clear();
   balls.clear();
@@ -98,6 +100,7 @@ void draw() {
     text("PRESS SPACE TO JOIN GAME  ", width/2-350, height/2);
   }
   else if (isGameOver) {
+    toCsound.sendGameOver();
     fill(255);
     textSize(50);
     text("GAME OVER", width/2-150, height/2);
@@ -110,6 +113,7 @@ void draw() {
     }
   }
   else if(hasWon) {
+    toCsound.sendNextLevel();
     int nextLevel = currentLevel + 1;
     print(nextLevel);
     if(nextLevel == 4) {
@@ -194,23 +198,6 @@ void oscEvent(OscMessage oscMessage) {
   }    
 }
 
-void registerPlayer() {
-  OscMessage myMessage = new OscMessage("/playerLogin");
-  print(hostAddress);
-  myMessage.add(hostAddress);
-  myMessage.add(playerPort);
-  oscP5.send(myMessage, server);
-  isRegistered = true;
-}
-
-void unregisterPlayer() {
-  print("unregistering");
-  OscMessage myMessage = new OscMessage("/playerLogout");
-  myMessage.add(hostAddress);
-  oscP5.send(myMessage, server);
-  isRegistered = false;
-}
-
 void keyPressed() {
   if (key == ' ') {
     if(isRegistered) {
@@ -285,6 +272,8 @@ void collideBallWithBricks() {
           message.add(brick.id);
           oscP5.send(message, server);
           
+          toCsound.sendBrickCollision(brick.id);
+          
           destroyedBricks.add(bricks.get(i));
           toRemove.append(i);
           brickHasAlreadyCollided = true;
@@ -305,6 +294,9 @@ void collidePaddleWithBall() {
         Paddle paddle = paddles.get(j);
         paddle.run(ball, isBoosting, isDeboosting, isPaddleInverted);
         ball.run(paddle.isColliding, balls, isPaddleInverted);
+        if(paddle.isColliding) {
+          //toCsound.sendPaddleCollision();
+        }
       };
       totalHits+=ball.hits;
      if(isBoosting) {
@@ -415,4 +407,19 @@ void setupNextLevel(int levelId) {
   
   //  Initialize paddles
   paddles.add(new Paddle(paddleWidth, paddleHeight, paddleX, paddleY, 0));
+}
+
+void registerPlayer() {
+  OscMessage myMessage = new OscMessage("/playerLogin");
+  myMessage.add(hostAddress);
+  myMessage.add(playerPort);
+  oscP5.send(myMessage, server);
+  isRegistered = true;
+}
+
+void unregisterPlayer() {
+  OscMessage myMessage = new OscMessage("/playerLogout");
+  myMessage.add(hostAddress);
+  oscP5.send(myMessage, server);
+  isRegistered = false;
 }
