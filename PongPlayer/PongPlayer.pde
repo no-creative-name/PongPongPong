@@ -96,7 +96,7 @@ void draw() {
   background(backgroundColor);
     
   if (isToRestart) {
-    background(backgroundColor);
+    background(0);
     fill(255);
     textSize(50);
     text("PRESS SPACE TO JOIN GAME  ", width/2-350, height/2);
@@ -129,7 +129,6 @@ void draw() {
       pongPongPong = false;
     }
     if(pongPongPong) {
-      print("Ponpon");
       fill(255);
       textSize(100);
       text("PONG PONG PONG!", width/2-width/4, height/2);
