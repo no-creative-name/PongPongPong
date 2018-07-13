@@ -15,11 +15,11 @@ void setup() {
 void oscEvent(OscMessage oscMessage) {
   if(oscMessage.checkAddrPattern("/playerLogin")) {
     sendPlayerCountToCsound();
-    registerPlayer(oscMessage.get(0).stringValue(), 15000);
+    registerPlayer(oscMessage.get(0).stringValue(), oscMessage.get(1).intValue());
   }
   if(oscMessage.checkAddrPattern("/playerLogout")) {
     sendPlayerCountToCsound();
-    unregisterPlayer(oscMessage.get(0).stringValue(), 15000);  
+    unregisterPlayer(oscMessage.get(0).stringValue());  
   }
   if(oscMessage.checkAddrPattern("/brickSend")) {
     if(players.size() > 0) {
@@ -51,7 +51,7 @@ void registerPlayer(String ipAddress, int port) {
     }
 }
 
-void unregisterPlayer(String ipAddress, int port) {
+void unregisterPlayer(String ipAddress) {
     for(int i = 0; i < players.size(); i++) {
       if(players.get(i).ipAddress.equals(ipAddress)) {
         players.remove(i);
