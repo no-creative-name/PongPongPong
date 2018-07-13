@@ -69,7 +69,7 @@ void setup() {
   playerPort = 15000;
   oscP5 = new OscP5(this, playerPort);
   server = new NetAddress("192.168.0.100", 12000);
-  toCsound = new OscToCsoundUtility();
+  toCsound = new OscToCsoundUtility(hostAddress);
   
   bricks.clear();
   balls.clear();

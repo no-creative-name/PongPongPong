@@ -2,8 +2,8 @@ class OscToCsoundUtility {
   
   NetAddress csound;
   
-  OscToCsoundUtility() {
-    csound = new NetAddress("192.168.0.104", 16000);
+  OscToCsoundUtility(String ipAddress) {
+    csound = new NetAddress(ipAddress, 16000);
   }
   
   void sendGameOver() {
