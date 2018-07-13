@@ -10,7 +10,7 @@ class SceneFactory {
     bricks.add(brickFactory.CreateQuad(590, 565, 700, 565, 635, 700, 525, 700, 6, color(0, 0, 0, 180)));
     bricks.add(brickFactory.CreateQuad(700, 300, 1065, 300, 895, 660, 530, 660, 7, color(255, 255, 255, 160)));
     
-    return color(205, 133, 63);
+    return color(255, 0, 255);
   }
   
   color CreateScene2() {
@@ -31,7 +31,7 @@ class SceneFactory {
     bricks.add(brickFactory.CreateQuad(510+s, 220+o, 540+s, 230+o, 530+s, 260+o, 500+s, 260+o, 18, color(80, 88, 109, 240)));    
     bricks.add(brickFactory.CreateQuad(505+s, 240+o, 460+s, 230+o, 455+s, 255+o, 500+s, 265+o, 19, color(203, 38, 42, 240)));  
     
-    return color(205, 133, 63);
+    return color(0, 255, 255);
   }
   
   color CreateScene3() {
@@ -43,7 +43,7 @@ class SceneFactory {
     bricks.add(brickFactory.CreateQuad(400, 410, 410, 410, 880, 600, 870, 600, 25, color(52, 142, 97)));
     bricks.add(brickFactory.CreateQuad(620, 630, 870, 410, 880, 410, 630, 630, 26, color(52, 142, 97)));
     
-    return color(205, 133, 63);
+    return color(255, 255, 0);
   }
   
   color CreateScene4() {
@@ -70,7 +70,7 @@ class SceneFactory {
     bricks.add(brickFactory.CreateQuad(314, 120, 305, 31, 397, 26, 406, 105, 44, color(#101103)));
     bricks.add(brickFactory.CreateQuad(401, 79, 538, 59, 540, 89, 406, 107, 45, color(#CA3904)));
     
-    return color(70);
+    return color(200);
   }
   
   color CreateScene5() {
@@ -94,7 +94,7 @@ class SceneFactory {
     bricks.add(brickFactory.CreateQuad(800, 700, 840, 270, 920, 290, 880, 720, 58, color(0)));
     bricks.add(brickFactory.CreateQuad(890, 705, 940, 708, 940, 750, 887, 750, 59, color(0)));
     
-    return color(70);
+    return color(0);
   }
   
   color CreateScene6 () {

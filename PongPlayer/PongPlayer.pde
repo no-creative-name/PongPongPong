@@ -2,11 +2,11 @@ import oscP5.*;
 import netP5.*;
 import java.net.*;
 import java.util.*;
+import java.awt.*;
 
 OscP5 oscP5;
 NetAddress server;
 OscToCsoundUtility toCsound;
-
 SceneFactory sceneFactory = new SceneFactory();
 BrickFactory brickFactory = new BrickFactory();
 
@@ -23,6 +23,8 @@ boolean isGameOver, hasWon, isBoosting, isDeboosting, isRegistered, isToRestart,
 boolean pongPongPong;
 String hostAddress;
 
+Robot robot;
+
 int count = 0;
 
 PFont font;
@@ -31,12 +33,20 @@ color backgroundColor;
 void setup() {
   
   pongPongPong = true;
-  //size(900, 800, P2D);
+  
+  try {
+    robot = new Robot();
+  }
+  catch(Exception e) {
+    e.printStackTrace();
+  }
+  //size(500, 500, P2D);
   fullScreen(P2D);
   noCursor();
   
   //pixelDensity(displayDensity());
   
+  totalHits = 0;
   currentLevel = 0;
   paddleWidth = 200;
   paddleHeight = 10;
@@ -140,8 +150,8 @@ void draw() {
     }
     if(pongPongPong) {
       fill(255);
-      textSize(100);
-      text("PONG PONG PONG!", width/2, height/2);
+      textSize(70);
+      text("PONG PONG PONG!", width/2 + 50, 100);
     }
     collideBallWithBricks();
     collidePaddleWithBall();
@@ -156,13 +166,17 @@ void draw() {
     
     textAlign(LEFT);
     fill(255);
-    textSize(25);
-    text("HITS: "+totalHits, 10, 50);
+    textSize(20);
+    text("HITS: "+totalHits, 10, 80);
     
     if (isBlackscreen) {
       fill(0);
       rect(0,0,width,height);
     }
+  }
+  
+  if (mouseY <= 100) {
+    robot.mouseMove(mouseX, height-1);
   }
   
   count++;
@@ -316,7 +330,7 @@ void collidePaddleWithBall() {
         paddle.run(ball, isBoosting, isDeboosting, isPaddleInverted);
         ball.run(paddle.isColliding, balls, isPaddleInverted);
         if(paddle.isColliding) {
-          //toCsound.sendPaddleCollision();
+          toCsound.sendPaddleCollision();
         }
       };
      if(isBoosting) {
