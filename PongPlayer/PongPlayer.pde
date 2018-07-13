@@ -17,7 +17,7 @@ ArrayList<Brick> destroyedBricks = new ArrayList<Brick>();
 ArrayList<Ball> balls = new ArrayList<Ball>();
 ArrayList<Paddle> paddles = new ArrayList<Paddle>();
 
-int currentLevel, paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime;
+int currentLevel, paddleHeight, paddleX, paddleY, ballDiameter, initialNumberOfBalls, totalHits, soundId, playerPort, blackscreenStartTime, highScore;
 float paddleWidth, initialBallSpeedX, initialBallSpeedY, initialBallX, initialBallY, ballInfluenceX;
 boolean isGameOver, hasWon, isBoosting, isDeboosting, isRegistered, isToRestart, isPaddleInverted, isBlackscreen;
 boolean pongPongPong;
@@ -40,8 +40,8 @@ void setup() {
   catch(Exception e) {
     e.printStackTrace();
   }
-  //size(500, 500, P2D);
-  fullScreen(P2D);
+  size(1920, 900, P2D);
+  //fullScreen(P2D);
   noCursor();
   
   //pixelDensity(displayDensity());
@@ -148,6 +148,9 @@ void draw() {
     if(count % 100 == 0 && count != 0) {
       pongPongPong = false;
     }
+    if(count % 10 == 0) {
+      sendScore();
+    }
     if(pongPongPong) {
       fill(255);
       textSize(70);
@@ -167,11 +170,16 @@ void draw() {
     textAlign(LEFT);
     fill(255);
     textSize(20);
-    text("HITS: "+totalHits, 10, 80);
+    text("HITS: "+totalHits, 10, 120);
+    text("HIGH SCORE: "+highScore, 10, 80);
     
     if (isBlackscreen) {
       fill(0);
       rect(0,0,width,height);
+      fill(255,0,0);
+      textAlign(CENTER);
+      textSize(100);
+      text("WRATH OF GOD", width/2, height/2);
     }
   }
   
@@ -194,6 +202,9 @@ void oscEvent(OscMessage oscMessage) {
     if(!isBrickAlreadyExisting) {
       bricks.add(brick);
     }
+  }
+  if(oscMessage.checkAddrPattern("/highScore")) {
+    this.highScore = oscMessage.get(0).intValue();
   }
   else if(oscMessage.checkAddrPattern("/godAddBall")) {
     if(balls.size() < 3) {
@@ -458,4 +469,11 @@ void unregisterPlayer() {
   myMessage.add(hostAddress);
   oscP5.send(myMessage, server);
   isRegistered = false;
+}
+
+void sendScore() {
+  OscMessage myMessage = new OscMessage("/playerScore");
+  myMessage.add(hostAddress);
+  myMessage.add(totalHits);
+  oscP5.send(myMessage, server);
 }

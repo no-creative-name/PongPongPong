@@ -4,12 +4,14 @@ import netP5.*;
 OscP5 oscP5;
 NetAddress godComputerLocation;
 
+int highScore;
+
 ArrayList<Player> players = new ArrayList<Player>();
 
 void setup() {
   size(300,300);
   oscP5 = new OscP5(this, 12000);
-  godComputerLocation = new NetAddress("192.168.0.104", 12000);
+  godComputerLocation = new NetAddress("192.168.0.107", 12000);
 }
 
 void oscEvent(OscMessage oscMessage) {
@@ -26,6 +28,21 @@ void oscEvent(OscMessage oscMessage) {
       forwardBrickMessageToRandomPlayer(oscMessage, oscMessage.get(0).stringValue());
     }
   }
+  if(oscMessage.checkAddrPattern("/playerScore")) {
+    Player currentPlayer;
+    for(int i = 0; i < players.size(); i++) {
+      if(players.get(i).ipAddress.equals(oscMessage.get(0).stringValue())) {
+         currentPlayer = players.get(i);
+         currentPlayer.score = oscMessage.get(1).intValue();
+      }
+    }
+    for(int i = 0; i < players.size(); i++) {
+      if(players.get(i).score > highScore) {
+        highScore = players.get(i).score;
+        sendHighScoreToAllPlayers();
+      }
+    }
+  }
 }
 
 void draw() {
@@ -33,6 +50,9 @@ void draw() {
     textSize(20);
     for(int i = 0; i < players.size(); i++) {
       text(players.get(i).ipAddress, width/2, 50+20*i);
+      if(players.get(i).score > highScore) {
+        sendHighScoreToAllPlayers();
+      }
     }
 }
 
@@ -85,6 +105,15 @@ void sendPlayerCountToCsound() {
     oscP5.send(soundMessage, new NetAddress("192.168.0.100", 12666));
 }
 
+void sendHighScoreToAllPlayers() {
+  for(int i = 0; i < players.size(); i++) {
+      OscMessage highScoreMessage = new OscMessage("/highScore");
+      highScoreMessage.add(highScore);
+      NetAddress myRemoteLocation = new NetAddress(players.get(i).ipAddress, players.get(i).port);
+      oscP5.send(highScoreMessage, myRemoteLocation);
+  }
+}
+
 void resetServer() {
   for(int i = 0; i < players.size(); i++) {
     OscMessage myMessage = new OscMessage("/playerLogout");
@@ -103,7 +132,7 @@ void keyPressed() {
 class Player {
 
   String ipAddress;
-  int port;
+  int port, score;
 
   Player(String _ipAddress, int _port) {
     ipAddress = _ipAddress;
