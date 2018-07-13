@@ -85,6 +85,21 @@ void sendPlayerCountToCsound() {
     oscP5.send(soundMessage, new NetAddress("192.168.0.100", 12666));
 }
 
+void resetServer() {
+  for(int i = 0; i < players.size(); i++) {
+    OscMessage myMessage = new OscMessage("/playerLogout");
+    myMessage.add(players.get(0).ipAddress);
+    oscP5.send(myMessage, godComputerLocation);
+    players.remove(i);
+  }
+}
+
+void keyPressed() {
+  if(key == ENTER) {
+    resetServer();
+  }
+}
+
 class Player {
 
   String ipAddress;
